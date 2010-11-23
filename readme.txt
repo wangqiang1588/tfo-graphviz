@@ -1,7 +1,7 @@
 === TFO Graphviz ===
 Contributors: chrisy
 Donate link: http://blog.flirble.org/donate
-Tags: graphviz, flirble
+Tags: graphviz, flirble, network, diagram, graph, dot, neato, twopi, circo, fdp, visualisation, visualization, layout, hierarchical
 Requires at least: 3.0.1
 Tested up to: 3.0.1
 Stable tag: 1.0
@@ -10,10 +10,10 @@ Generates Graphviz graphics using shortcodes. Supports almost all Graphviz featu
 
 == Description ==
 
-[Graphviz](http://www.graphviz.org/) is a powerful tool for visualising network and tree structures the connect objects.
+[Graphviz](http://www.graphviz.org/) is a powerful tool for visualising network and tree structures that connect objects.
 
 This WordPress plugin provides a shortcode mechanism to create Graphviz graphics within blogs, including image map generation and most
-other GraphViz features.
+other Graphviz features.
 
 == Installation ==
 
@@ -24,7 +24,7 @@ Installation is simple. Either install from directly within WordPress or:
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Use the `[graphviz]` shortcode to generate graphs.
 
-You will also need GraphViz installed on the host. See the FAQ and http://www.graphviz.org/Download.php .
+You will also need Graphviz installed on the host. See the FAQ and http://www.graphviz.org/Download.php .
 
 == Frequently Asked Questions ==
 
@@ -43,7 +43,7 @@ The online documentation for [Graphviz](http://www.graphviz.org/) is terse and n
 
 There are however several other introductions to Graphviz and DOT, including [an excerpt on the O'Reilly LinuxDevCenter.com site](http://linuxdevcenter.com/pub/a/linux/2004/05/06/graphviz_dot.html). Another approach would be to look at the examples in the [Graphviz gallery](http://www.graphviz.org/Gallery.php).
 
-= How do I install GraphViz =
+= How do I install Graphviz =
 
 This depends on your host. You will find some details at http://www.graphviz.org/Download.php but many systems also have it in their own
 package management system, for example this is package `graphviz` on Debian, Ubuntu and Fedora systems.
@@ -130,20 +130,20 @@ Where `<options>` is anything from this list. All are entirely optional:
 * `id="`*&lt;id&gt;*`"`
 
   Provides the identifier used to link the generated image to an image map. If you use the `simple` option then it also
-  provides the name of the generated DOT graph container (since GraphViz uses this to generate the image map). If not given
+  provides the name of the generated DOT graph container (since Graphviz uses this to generate the image map). If not given
   then an identifier is generated with the form `tfo_graphviz_N` where *N* is an integer that starts at one when the plugin
   is loaded and is incremented with use.
 
 * `imap="yes|no"`
 
-  GraphViz can generate image maps using any URL's given in the DOT code so that clicking on objects in the resultant image
-  will direct a web browser to a new page. The effect of this option is to both instruct GraphViz to generate a client-side
+  Graphviz can generate image maps using any URL's given in the DOT code so that clicking on objects in the resultant image
+  will direct a web browser to a new page. The effect of this option is to both instruct Graphviz to generate a client-side
   image map and to also insert that map into the generated HTML. It will use the `id` value as the name of the map (see the
   `id` option for details). `imap` defaults to `no`.
 
 * `lang="<dot|neato|twopi|circo|fdp>"`
 
-  Specifies the particular GraphViz interpreter to use. The options are `dot`, `neato`, `twopi`, `circo` and `fdp`.
+  Specifies the particular Graphviz interpreter to use. The options are `dot`, `neato`, `twopi`, `circo` and `fdp`.
   The default is `dot`.
 
 * `output="<png|gif|jpg>"`
