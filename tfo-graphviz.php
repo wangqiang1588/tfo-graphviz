@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: TFO Graphviz
-Plugin URI: http://blog.flirble.org/graphviz
+Plugin URI: http://blog.flirble.org/projects/graphviz
 Description: Converts inline DOT code into an image, with optional image map, using Graphviz.
-Version: 1.0
+Version: 1.1
 Author: Chris Luke
 Author URI: http://blog.flirble.org/
 Copyright: Chris Luke
@@ -17,21 +17,56 @@ class TFO_Graphviz {
 	var $options;
 	var $methods = array(
 		'TFO_Graphviz_Graphviz' => 'graphviz',
-		'TFO_Graphviz_Remote' => 'remote'
+		'TFO_Graphviz_Remote' => 'remote',
+		'TFO_Graphviz_PHP' => 'php'
+	);
+	var $method_label = array(
+		'graphviz' => 'Local Graphviz installation using the <code>dot</code> Graphviz binary (recommended)',
+		'remote' => 'Remote Graphviz server over HTTP (not implemented) (easiest)',
+		'php' => 'Local PHP bindings for Graphviz (eg, <code>libgv-php5</code> on Debian/Ubuntu) (fastest)',
 	);
 	var $langs = array('dot', 'neato', 'twopi', 'circo', 'fdp');
 	var $outputs = array('gif', 'png', 'jpg');
-	var $count;
+	var $count, $err;
 
 	function init() {
 		$this->options = get_option('tfo-graphviz');
 		$this->count = 1;
-	
+
+		@define('TFO_GRAPHVIZ_CONTENT', 'tfo-graphviz');
+		@define('TFO_GRAPHVIZ_CONTENT_DIR', WP_CONTENT_DIR.'/'.TFO_GRAPHVIZ_CONTENT);
+		@define('TFO_GRAPHVIZ_CONTENT_URL', WP_CONTENT_URL.'/'.TFO_GRAPHVIZ_CONTENT);
 		@define('TFO_GRAPHVIZ_GRAPHVIZ_PATH', $this->options['graphviz_path']);
 		@define('TFO_GRAPHVIZ_CONVERT_PATH', $this->options['convert_path']);
-	
+		@define('TFO_GRAPHVIZ_MAXAGE', $this->options['maxage']);
+
 		add_action('wp_head', array(&$this, 'wp_head'));
 		add_shortcode('graphviz', array(&$this, 'shortcode'));
+
+		register_shutdown_function(array(&$this, 'cleanup_content_dir'));
+	}
+
+	function cleanup_content_dir() {
+		if(TFO_GRAPHVIZ_MAXAGE && TFO_GRAPHVIZ_MAXAGE > 0 && is_dir(TFO_GRAPHVIZ_CONTENT_DIR)) {
+			$zaplist = array();
+			if($dh = @opendir(TFO_GRAPHVIZ_CONTENT_DIR)) {
+				while(($fname = readdir($dh)) !== false) {
+					$file = TFO_GRAPHVIZ_CONTENT_DIR.'/'.$fname;
+					if(!is_file($file)) continue;
+
+					$st = @stat($file);
+					if(!$st) continue;
+
+					if((time() - $st['mtime']) > (TFO_GRAPHVIZ_MAXAGE * 24*60*60)) {
+						array_push($zaplist, $file);
+					}
+				}
+				closedir($dh);
+			}
+			foreach($zaplist as $fname) {
+				@unlink($fname);
+			}
+		}
 	}
 
 	function wp_head() {
@@ -80,6 +115,12 @@ class TFO_Graphviz {
 		}
 
 		$gv = $this->graphviz($dot, $atts);
+		if(!$gv) {
+			$e = "Graphviz generation failed";
+			if($this->err) $e .= ': '.$this->err;
+			else $e .= '.';
+			return $e;
+		}
 		$url = clean_url($gv->url());
 		$href = $gv->href;
 		if($href) {
@@ -97,15 +138,24 @@ class TFO_Graphviz {
 
 		return $ret;
 	}
-	
+
 	function &graphviz($dot, $atts) {
-		if(empty($this->methods[$this->options['method']]))
+		$this->err = false;
+		if(empty($this->methods[$this->options['method']])) {
+			$this->err = 'Unknown method "'.$this->options['method'].'"';
 			return false;
+		}
 
 		// Validate atts
 		$atts['id'] = attribute_escape($atts['id']);
-		if($atts['lang'] && !in_array($atts['lang'], $this->langs)) return false;
-		if($atts['output'] && !in_array($atts['output'], $this->outputs)) return false;
+		if($atts['lang'] && !in_array($atts['lang'], $this->langs)) {
+			$this->err = "Unknown lang: ".$atts['lang'];
+			return false;
+		}
+		if($atts['output'] && !in_array($atts['output'], $this->outputs)) {
+			$this->err = "Unknown output: ".$atts['output'];
+			return false;
+		}
 
 		$yes = array('true', 'yes', '1');
 		foreach(array('simple', 'imap') as $att) {
@@ -113,9 +163,13 @@ class TFO_Graphviz {
 			else $atts[$att] = false;
 		}
 		require_once(dirname( __FILE__ )."/tfo-graphviz-{$this->methods[$this->options['method']]}.php" );
-		$gv_object = new $this->options['method']($dot, $atts, WP_CONTENT_DIR.'/tfo-graphviz', WP_CONTENT_URL.'/tfo-graphviz');
+		if(!tfo_mkdir_p(TFO_GRAPHVIZ_CONTENT_DIR)) {
+			$this->err = "Directory <code>".TFO_GRAPHVIZ_CONTENT_DIR."</code> is either not writable, not a directory or not creatable";
+			return false;
+		}
+		$gv_object = new $this->options['method']($dot, $atts, TFO_GRAPHVIZ_CONTENT_DIR, TFO_GRAPHVIZ_CONTENT_URL);
 		if(!$gv_object) {
-			print "argh!";
+			$this->err = "Unable to create Graphviz renderer, check your plugin settings";
 			return false;
 		}
 		if(isset($this->options['wrapper'])) $gv_object->wrapper($this->options['wrapper']);
@@ -126,6 +180,35 @@ class TFO_Graphviz {
 		return $gv_object;
 	}
 }
+
+if(!function_exists('tfo_mkdir_p')) :
+function tfo_mkdir_p($target) {
+	// modified from php.net/mkdir user contributed notes
+	if(file_exists($target)) {
+		if (!@is_dir($target) || !@is_writable($target))
+			return false;
+		else
+			return true;
+	}
+
+	// Attempting to create the directory may clutter up our display.
+	if(@mkdir($target)) {
+		$stat = @stat(dirname($target));
+		$dir_perms = $stat['mode'] & 0007777;  // Get the permission bits.
+		@chmod($target, $dir_perms);
+		return true;
+	} else {
+		if(is_dir(dirname($target)))
+			return false;
+	}
+
+	// If the above failed, attempt to create the parent node, then try again.
+	if (tfo_mkdir_p(dirname($target)))
+		return tfo_mkdir_p($target);
+
+	return false;
+}
+endif;
 
 if(is_admin()) {
 	require(dirname(__FILE__).'/tfo-graphviz-admin.php');

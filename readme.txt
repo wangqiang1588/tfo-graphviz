@@ -4,7 +4,7 @@ Donate link: http://blog.flirble.org/donate
 Tags: graphviz, flirble, network, diagram, graph, dot, neato, twopi, circo, fdp, visualisation, visualization, layout, hierarchical
 Requires at least: 3.0.1
 Tested up to: 3.0.1
-Stable tag: 1.0
+Stable tag: 1.1
 
 Generates Graphviz graphics using shortcodes. Supports almost all Graphviz features.
 
@@ -20,8 +20,9 @@ other Graphviz features.
 Installation is simple. Either install from directly within WordPress or:
 
 1. Download and unzip the plugin to the `/wp-content/plugins/tfo-graphviz` directory within your WordPress installation.
-1. Make the directory `/wp-content/tfo-graphviz` and make it writeable by the web server - this is where generated images and image maps go.
+1. Make the directory `/wp-content/tfo-graphviz` and make it writable by the web server - this is where generated images and image maps go.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
+1. Choose a generation method on the plugin settings page.
 1. Use the `[graphviz]` shortcode to generate graphs.
 
 You will also need Graphviz installed on the host. See the FAQ and http://www.graphviz.org/Download.php .
@@ -47,6 +48,12 @@ There are however several other introductions to Graphviz and DOT, including [an
 
 This depends on your host. You will find some details at http://www.graphviz.org/Download.php but many systems also have it in their own
 package management system, for example this is package `graphviz` on Debian, Ubuntu and Fedora systems.
+
+There are currently two ways to use a local installation of Graphviz. The settings page will only show options for those
+methods that are actually available and configured correctly.
+
+1. Using a local *graphviz* binary. You configure the path to this binary on the admin settings page of the plugin.
+1. Using PHP bindings to the Graphviz library. This requires that *gv.php* is available and that the associated module is either already loaded or loadable with *dl()*. *dl* is often disabled in *php.ini* and doesn't work on multithreaded webservers (in which case, ensure the library is loaded with *extensions=gv.so* or similar somewhere in the PHP configuration).
 
 I may later provide a web-based system to produce graphics on demand, for a nominal fee.
 
@@ -102,6 +109,13 @@ I may later provide a web-based system to produce graphics on demand, for a nomi
 
 
 == Changelog ==
+
+= 1.1 =
+* Added support for locally installed PHP bindings to the Graphviz library. This only works if PHP either allows dl() to load a module or gv.so/dll is staticly configured to load in php.ini.
+* Made render module selection somewhat more robust.
+* Attempt to create our wp-content/tfo-graphviz directory if it doesn't already exist.
+* Better (as in, "any at all") error generation in the shortcode handler.
+* Add content expiration - configurable. Will remove files from the wp-content/tfo-graphviz directory, but only if the threshold is >0 and older than the threshold.
 
 = 1.0 =
 * First release.

@@ -11,3 +11,4 @@ require_once(dirname(__FILE__).'/tfo-graphviz-method.php');
 class TFO_Graphviz_Remote extends TFO_Graphviz_Method {
 }
 
+return FALSE;

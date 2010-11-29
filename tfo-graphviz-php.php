@@ -1,6 +1,6 @@
 <?php
 /*
-Version: 1.1
+Version: 1.0
 Copyright: Chris Luke
 Copyright: the Flirble Organisation
 License: GPL2+
@@ -13,7 +13,19 @@ TFO_GRAPHVIZ_GRAPHVIZ_PATH
 
 require_once(dirname(__FILE__).'/tfo-graphviz-method.php');
 
-class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
+foreach(array('gv.php', 'libgv-php5/gv.php', 'libgv-php4/gv.php', 'libgv-php/gv.php') as $gv) {
+	@include_once($gv);
+	if(class_exists('gv')) break;
+}
+
+if(!class_exists('gv')) {
+	// Extension didn't load, so we can't either
+	return FALSE;
+}
+
+echo "loaded ";
+
+class TFO_Graphviz_PHP extends TFO_Graphviz_Method {
 
 	// Really should be called $preamble.
 	var $wrapper = "";
@@ -25,7 +37,7 @@ class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 
 	var $_debug = false;
 
-	function TFO_Graphviz_Graphviz($dot, $atts, $img_path_base=null, $img_url_base=null) {
+	function TFO_Graphviz_PHP($dot, $atts, $img_path_base=null, $img_url_base=null) {
 		$this->__construct($dot, $atts, $img_path_base, $img_url_base);
 	}
 
@@ -49,49 +61,31 @@ class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 	}
 
 	function process_dot($imgfile, $mapfile) {
-		if(!defined('TFO_GRAPHVIZ_GRAPHVIZ_PATH') || !file_exists(TFO_GRAPHVIZ_GRAPHVIZ_PATH))
-			return new WP_Error('graphviz_path', __('Graphviz path not specified, is wrong or binary is missing.', 'tfo-graphviz'));
-
 		if(empty($this->dot))
 			return new WP_Error('blank', __('No graph provided', 'tfo-graphviz'));
 
-		$args = array(
-			'-K'.$this->lang,
-		);
-		if($this->imap) {
-			array_push($args,
-				'-Tcmapx',
-				'-o'.$mapfile
-			);
-		}
-		array_push($args,
-			'-T'.$this->output,
-			'-o'.$imgfile
-		);
-			
-		$cmd = TFO_GRAPHVIZ_GRAPHVIZ_PATH;
-		foreach($args as $arg) {
-			$cmd .= ' '.escapeshellarg($arg);
+		$gv = gv::readstring($this->dot);
+		if(!$gv)
+			return new WP_Error('blank', __('Graphviz could not parse the DOT', 'tfo-graphviz'));
+
+		if(!gv::layout($gv, $this->lang)) {
+			gv::rm($gv);
+			return new WP_Error('blank', __('Graphviz did not like the lang', 'tfo-graphviz'));
 		}
 
-		$ds = array(
-			0 => array('pipe', 'r'),
-			1 => array('pipe', 'w'),
-			2 => array('file', '/dev/null', 'w'),
-		);
-		$pipes = undef;
-		$proc = proc_open($cmd, $ds, $pipes, '/tmp', array());
-		if(is_resource($proc)) {
-			fwrite($pipes[0], $this->dot);
-			fclose($pipes[0]);
-	
-			$out = stream_get_contents($pipes[1]);
-			fclose($pipes[1]);
-
-			proc_close($proc);
-		} else {
+		if(!gv::render($gv, $this->output, $imgfile)) {
+			gv::rm($gv);
 			return new WP_Error('graphviz_exec', __( 'Graphviz cannot generate graph', 'tfo-graphviz' ));
 		}
+
+		if($this->imap) {
+			if(!gv::render($gv, 'cmapx', $mapfile)) {
+				gv::rm($gv);
+				return new WP_Error('graphviz_exec', __( 'Graphviz cannot generate image map', 'tfo-graphviz' ));
+			}
+		}
+
+		gv::rm($gv); // all done
 
 		if(!file_exists($imgfile) || ($this->imap && !file_exists($mapfile))) {
 			return new WP_Error('graphviz_exec', __( 'Graphviz cannot generate graph', 'tfo-graphviz' ), "No output files generated.");
