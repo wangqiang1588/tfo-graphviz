@@ -1,10 +1,4 @@
-<?php
-/*
-Version: 1.0
-Copyright: Chris Luke
-Copyright: The Flirble Organisation
-License: GPL2+
-*/
+<?php // $Id$
 
 class TFO_Graphviz_Method {
 	var $dot;
@@ -24,8 +18,6 @@ class TFO_Graphviz_Method {
 		}
 		$this->url = false;
 	}
-
-	function wrapper($wrapper = false) {}
 
 	function url() {
 		return $this->url;

@@ -1,10 +1,4 @@
-<?php
-/*
-Version: 1.1
-Copyright: Chris Luke
-Copyright: the Flirble Organisation
-License: GPL2+
-*/
+<?php // $Id$
 
 /*
 Must define the following constants:
@@ -14,10 +8,6 @@ TFO_GRAPHVIZ_GRAPHVIZ_PATH
 require_once(dirname(__FILE__).'/tfo-graphviz-method.php');
 
 class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
-
-	// Really should be called $preamble.
-	var $wrapper = "";
-
 	var $tmp_file;
 	var $img_path_base;
 	var $img_url_base;
@@ -110,12 +100,6 @@ class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 		@unlink( $this->tmp_file );
 
 		return true;
-	}
-
-	function wrapper( $wrapper = false ) {
-		if ( is_string($wrapper) )
-			$this->wrapper = $wrapper;
-		return $this->wrapper;
 	}
 
 	function url() {

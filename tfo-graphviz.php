@@ -1,9 +1,9 @@
-<?php
+<?php // $Id$
 /*
 Plugin Name: TFO Graphviz
 Plugin URI: http://blog.flirble.org/projects/graphviz
 Description: Converts inline DOT code into an image, with optional image map, using Graphviz.
-Version: 1.1
+Version: 1.2
 Author: Chris Luke
 Author URI: http://blog.flirble.org/
 Copyright: Chris Luke
@@ -37,7 +37,6 @@ class TFO_Graphviz {
 		@define('TFO_GRAPHVIZ_CONTENT_DIR', WP_CONTENT_DIR.'/'.TFO_GRAPHVIZ_CONTENT);
 		@define('TFO_GRAPHVIZ_CONTENT_URL', WP_CONTENT_URL.'/'.TFO_GRAPHVIZ_CONTENT);
 		@define('TFO_GRAPHVIZ_GRAPHVIZ_PATH', $this->options['graphviz_path']);
-		@define('TFO_GRAPHVIZ_CONVERT_PATH', $this->options['convert_path']);
 		@define('TFO_GRAPHVIZ_MAXAGE', $this->options['maxage']);
 
 		add_action('wp_head', array(&$this, 'wp_head'));
@@ -100,6 +99,7 @@ class TFO_Graphviz {
 			'imap' => false,
 			'href' => false,
 			'title' => '',
+			'remote_key' => $this->options['remote_key'],
 		), $_atts);
 
 		$dot = preg_replace(array('#<br\s*/?>#i', '#</?p>#i'), ' ', $dot);
@@ -162,17 +162,20 @@ class TFO_Graphviz {
 			if($atts[$att] && in_array(strtolower($atts[$att]), $yes)) $atts[$att] = true;
 			else $atts[$att] = false;
 		}
-		require_once(dirname( __FILE__ )."/tfo-graphviz-{$this->methods[$this->options['method']]}.php" );
+
+		if(!isset($atts['remote_key'])) $atts['remote_key'] = $this->options['remote_key'];
+
 		if(!tfo_mkdir_p(TFO_GRAPHVIZ_CONTENT_DIR)) {
 			$this->err = "Directory <code>".TFO_GRAPHVIZ_CONTENT_DIR."</code> is either not writable, not a directory or not creatable";
 			return false;
 		}
+
+		require_once(dirname( __FILE__ )."/tfo-graphviz-{$this->methods[$this->options['method']]}.php" );
 		$gv_object = new $this->options['method']($dot, $atts, TFO_GRAPHVIZ_CONTENT_DIR, TFO_GRAPHVIZ_CONTENT_URL);
 		if(!$gv_object) {
 			$this->err = "Unable to create Graphviz renderer, check your plugin settings";
 			return false;
 		}
-		if(isset($this->options['wrapper'])) $gv_object->wrapper($this->options['wrapper']);
 
 		// Force generation of the image etc
 		//$gv_object->url();

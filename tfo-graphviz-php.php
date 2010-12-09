@@ -1,15 +1,4 @@
-<?php
-/*
-Version: 1.0
-Copyright: Chris Luke
-Copyright: the Flirble Organisation
-License: GPL2+
-*/
-
-/*
-Must define the following constants:
-TFO_GRAPHVIZ_GRAPHVIZ_PATH
-*/
+<?php // $Id$
 
 require_once(dirname(__FILE__).'/tfo-graphviz-method.php');
 
@@ -23,13 +12,7 @@ if(!class_exists('gv')) {
 	return FALSE;
 }
 
-echo "loaded ";
-
 class TFO_Graphviz_PHP extends TFO_Graphviz_Method {
-
-	// Really should be called $preamble.
-	var $wrapper = "";
-
 	var $tmp_file;
 	var $img_path_base;
 	var $img_url_base;
@@ -104,12 +87,6 @@ class TFO_Graphviz_PHP extends TFO_Graphviz_Method {
 		@unlink( $this->tmp_file );
 
 		return true;
-	}
-
-	function wrapper( $wrapper = false ) {
-		if ( is_string($wrapper) )
-			$this->wrapper = $wrapper;
-		return $this->wrapper;
 	}
 
 	function url() {

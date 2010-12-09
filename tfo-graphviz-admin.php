@@ -1,4 +1,4 @@
-<?php
+<?php // $Id$
 
 if (!defined('ABSPATH')) exit;
 
@@ -74,7 +74,7 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 
 		if (isset($new['method'])) {
 			if(empty($this->methods[$new['method']])) {
-				$this->errors->add('method', __( 'Invalid Graphviz generation method', 'tfo-graphviz' ), $new['method'] );
+				$this->errors->add('method', __( 'Invalid Graphviz generation method', 'tfo-graphviz' ), $new['method']);
 			} else {
 				$method = $new['method'];
 			}
@@ -85,13 +85,6 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 			$css = trim( preg_replace( '/[\n]+/', "\n", $css ) );
 		}
 
-		if ( isset( $new['wrapper'] ) ) {
-			$wrapper = str_replace( array("\n", "\r"), "\n", $new['wrapper'] );
-			if ( !$wrapper = trim( preg_replace('/[\n]+/', "\n", $new['wrapper'] ) ) )
-				$wrapper = false;
-
-		}
-
 		if ( isset( $new['graphviz_path'] ) ) {
 			$new['graphviz_path'] = trim( $new['graphviz_path'] );
 			if ( ( !$new['graphviz_path'] || !file_exists( $new['graphviz_path'] ) ) && 'TFO_Graphviz_Remote' != $method )
@@ -100,35 +93,31 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 				$graphviz_path = $new['graphviz_path'];
 		}
 
-		if ( isset( $new['convert_path'] ) ) {
-			$new['convert_path'] = trim( $new['convert_path'] );
-			if ( ( !$new['convert_path'] || !file_exists( $new['convert_path'] ) ) && 'unused' == $method )
-				$this->errors->add( 'convert_path', __( '<code>convert</code> path not found.', 'tfo-graphviz' ), $new['convert_path'] );
-			else
-				$convert_path = $new['convert_path'];
-		}
-
 		if(isset($new['maxage'])) {
 			$maxage = trim($new['maxage']) + 0;
 		}
 
-		$this->options = compact('css', 'graphviz_path', 'convert_path', 'wrapper', 'method', 'maxage');
+		if(isset($new['remote_key'])) {
+			$remote_key = trim($new['remote_key']);
+		}
+
+		$this->options = compact('css', 'graphviz_path', 'method', 'maxage', 'remote_key');
 		update_option('tfo-graphviz', $this->options);
 		return !count($this->errors->get_error_codes());
 	}
 
 	// Attempts to use current settings to generate a temporory image (new with every page load)
 	function test_image() {
-		if ( 'TFO_Graphviz_Remote' != $this->options['method'] && !is_writable( TFO_GRAPHVIZ_CONTENT_DIR ) )
+		if (!is_writable(TFO_GRAPHVIZ_CONTENT_DIR))
 			return false;
 
 		if ( is_array( $this->options ) )
-			extract( $this->options, EXTR_SKIP );
+			extract($this->options, EXTR_SKIP);
 
 		if ('TFO_Graphviz_Graphviz' == $method && (!$graphviz_path))
 			return;
 
-		@unlink( TFO_GRAPHVIZ_CONTENT_DIR.'/test.png' );
+		@unlink(TFO_GRAPHVIZ_CONTENT_DIR.'/test.png');
 
 		$graphviz_object = $this->graphviz('digraph test { a1 -> a2 -> a3 -> a1; }', array(
 			'id' => 'test',
@@ -140,9 +129,6 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 		if(!$graphviz_object) {
 			return false;
 		}
-
-		if ( !empty( $wrapper ) )
-			$graphviz_object->wrapper( $wrapper );
 
 		$message = '';
 
@@ -231,7 +217,6 @@ tr.tfo-graphviz-method-<?php echo $current_method; ?> {
 			wp_die(__('You need more special-sauce to manage TFO Graphviz.', 'tfo-graphviz'));
 
 		$available_methods = array();	
-		$default_wrappers = array();
 		foreach ( $this->methods as $class => $method ) {
 			$included = include_once(dirname(__FILE__)."/tfo-graphviz-$method.php" );
 			if($included === FALSE) // module didn't load, or indicated it was not useable
@@ -240,7 +225,6 @@ tr.tfo-graphviz-method-<?php echo $current_method; ?> {
 			if('TFO_Graphviz_Remote' == $class)
 				continue;
 			$graphviz_object = new $class('a->b;', array(id=>'admin',simple=>true));
-			$default_wrappers[$method] = $graphviz_object->wrapper();
 		}
 		unset( $class, $method, $graphviz_object );
 
@@ -280,8 +264,8 @@ tr.tfo-graphviz-method-<?php echo $current_method; ?> {
 		<tr>
 			<th scope="row"><?php _e( 'Syntax' ); ?></th>
 			<td class="syntax">
-				<p><?php printf( __( 'You may use either the shortcode syntax %s<br />to insert graphs into your posts.', 'tfo-graphviz' ),
-					'<code>[graphviz]digraph test { a0 -> a1 -> a0; }[/graphviz]</code>'
+				<p><?php printf( __( 'Use the shortcode syntax %s to insert graphs into your posts.', 'tfo-graphviz' ),
+					'<code>[graphviz]digraph test { a1 -> a2 -> a3 -> a1; }[/graphviz]</code>'
 				); ?></p>
 				<p><?php _e( 'For more information, see the <a href="http://blog.flirble.org/projects/tfo-graphviz/">FAQ</a>' ); ?></p>
 			</td>
@@ -302,7 +286,7 @@ tr.tfo-graphviz-method-<?php echo $current_method; ?> {
 			</td>
 		</tr>
 
-		<tr class="tfo-graphviz-path<?php if ( in_array( 'graphviz_path', $errors ) ) echo ' form-invalid'; ?>">
+		<tr class="tfo-graphviz-path tfo-graphviz-method tfo-graphviz-method-graphviz <?php if ( in_array( 'graphviz_path', $errors ) ) echo ' form-invalid'; ?>">
 			<th scope="row"><label for="tfo-graphviz-graphviz-path"><?php _e( '<code>graphviz</code> path' ); ?></label></th>
 			<td><input type='text' name='tfo-graphviz[graphviz_path]' value='<?php echo attribute_escape( $values['graphviz_path'] ); ?>' id='tfo-graphviz-graphviz-path' /><?php
 				if ( !$this->options['graphviz_path'] ) {
@@ -315,28 +299,17 @@ tr.tfo-graphviz-method-<?php echo $current_method; ?> {
 			?></td>
 		</tr>
 
+		<tr class="tfo-graphviz-path tfo-graphviz-method tfo-graphviz-method-remote <?php if ( in_array( 'graphviz_remote_key', $errors ) ) echo ' form-invalid'; ?>">
+			<th scope="row"><label for="tfo-graphviz-remote-key"><?php _e( 'Remote TFO Graphviz API key (blank or invalid keymeans "free" mode)' ); ?></label></th>
+			<td><input type='text' name='tfo-graphviz[remote_key]' value='<?php echo attribute_escape( $values['remote_key'] ); ?>' size='64' id='tfo-graphviz-remote-key' /><?php
+			?></td>
+		</tr>
+
 		<tr class="tfo-graphviz-maxage<?php if ( in_array( 'graphviz_maxage', $errors ) ) echo ' form-invalid'; ?>">
 			<th scope="row"><label for="tfo-graphviz-maxage"><?php _e('Maximum age, in days, of generated content (enter <em>0</em> to disable expiration)'); ?></label></th>
 			<td><input type='text' name='tfo-graphviz[maxage]' value='<?php echo attribute_escape( $values['maxage'] ); ?>' id='tfo-graphviz-maxage' /></td>
 		</tr>
 
-<!--
-		<tr class="tfo-graphviz-method tfo-graphviz-method-graphviz<?php if ( in_array( 'wrapper', $errors ) ) echo ' form-invalid	'; ?>">
-			<th scope="row"><label for="tfo-graphviz-wrapper"><?php _e( 'DOT Preamble', 'tfo-graphviz' ); ?></label></th>
-			<td>
-				<textarea name='tfo-graphviz[wrapper]' rows='8' cols="50" id='tfo-graphviz-wrapper'><?php echo wp_specialchars( $values['wrapper'] ); ?></textarea>
-			</td>
-		</tr>
-	<?php foreach ( $default_wrappers as $method => $default_wrapper ) : ?>
-		<tr class="tfo-graphviz-method tfo-graphviz-method-<?php echo $method; ?>">
-			<th></th>
-			<td>
-				<h4>Leaving the above blank will use the following default preamble.</h4>
-				<div class="pre"><code><?php echo $default_wrapper; ?></code></div>
-			</td>
-		</tr>
-	<?php endforeach; ?>
--->
 	</tbody>
 	</table>
 
@@ -365,21 +338,18 @@ tr.tfo-graphviz-method-<?php echo $current_method; ?> {
 
 		if ( empty( $graphviz_path ) )
 			$graphviz_path = trim( @exec( 'which dot' ) );
-		if ( empty( $convert_path ) )
-			$convert_path = trim( @exec( 'which convert' ) );
 
 		$graphviz_path = $graphviz_path && @file_exists($graphviz_path) ? $graphviz_path : false;
-		$convert_path = $convert_path && @file_exists( $convert_path ) ? $convert_path : false;
-
-		if ( empty( $wrapper ) )
-			$wrapper = false;
 
 		if(empty($maxage))
 			$maxage = 30;
 
+		if(empty($remote_key))
+			$remote_key = '';
+
 		$activated = true;
 
-		$this->options = compact('method', 'css', 'graphviz_path', 'convert_path', 'wrapper', 'maxage', 'activated' );
+		$this->options = compact('method', 'css', 'graphviz_path', 'maxage', 'activated', 'remote_key');
 		update_option( 'tfo-graphviz', $this->options );
 	}
 }
