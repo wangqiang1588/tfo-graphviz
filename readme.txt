@@ -1,9 +1,8 @@
 === TFO Graphviz ===
 Contributors: chrisy
-Donate link: http://blog.flirble.org/donate
 Tags: graphviz, flirble, network, diagram, graph, dot, neato, twopi, circo, fdp, visualisation, visualization, layout, hierarchical
 Requires at least: 3.0.0
-Tested up to: 3.0.3
+Tested up to: 3.8.3
 Stable tag: 1.2
 
 Generates Graphviz graphics using shortcodes. Supports almost all Graphviz features.
