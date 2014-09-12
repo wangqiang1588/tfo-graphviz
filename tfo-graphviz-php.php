@@ -14,7 +14,6 @@ if (!extension_loaded('gv')) {
 }
 
 foreach(array('gv.php', 'libgv-php5/gv.php', 'libgv-php4/gv.php', 'libgv-php/gv.php') as $gv) {
-	print "try $gv ";
 	try {
 		@include_once($gv);
 	} catch (Exception $e) {}

@@ -3,7 +3,7 @@ Contributors: chrisy
 Tags: graphviz, flirble, network, diagram, graph, dot, neato, twopi, circo, fdp, visualisation, visualization, layout, hierarchical
 Requires at least: 3.0.0
 Tested up to: 4.0
-Stable tag: 1.4
+Stable tag: 1.5
 
 Generates Graphviz graphics using shortcodes. Supports almost all Graphviz features.
 
@@ -53,7 +53,7 @@ Users should note that DOT syntax varies between processors and between version 
 
 = Nothing is being rendered, maybe my DOT is broken? =
 
-If you're using a local Graphviz renderer then errors from Graphviz should be presented where you expect the graph to appear.
+If you're using a local Graphviz renderer then errors from Graphviz should be presented where you expect the graph to appear. Note that because of how Wordpress submits content to plugins the line numbering will not always match what you expect.
 
 = How do I install Graphviz locally =
 
@@ -63,9 +63,16 @@ package management system, for example this is package `graphviz` on Debian, Ubu
 There are currently two ways to use a local installation of Graphviz. The settings page will only show options for those
 methods that are actually available and configured correctly.
 
-1. Using a local Graphviz installation and the *dot* binary. You configure the path to this binary on the admin settings page of the plugin.
-1. Using PHP bindings to the Graphviz library. This requires that *gv.php* is available and that the associated module is either already loaded or loadable with *dl()*. *dl* is often disabled in *php.ini* and doesn't work on multithreaded webservers (in which case, ensure the library is loaded with *extensions=gv.so* or similar somewhere in the PHP configuration).
+1. Using a local Graphviz installation and the `dot` binary. You configure the path to this binary on the admin settings page of the plugin.
+1. Using PHP bindings to the Graphviz library. This requires that `gv.php` is available.
 
+== I'm using the PHP bindings but Graphviz doesn't work! ==
+
+This requires that `gv.php` is available and that the associated module is either already loaded or loadable with `dl()`.
+
+`dl()` is often disabled in `php.ini` and doesn't work on multithreaded webservers; it's entirely disabled in modern Apache2 httpd modules.
+
+For these cases you must ensure the library is loaded with an entry like `extension=gv.so` or similar somewhere in the PHP configuration.
 
 == Screenshots ==
 
