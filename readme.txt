@@ -3,7 +3,7 @@ Contributors: chrisy
 Tags: graphviz, flirble, network, diagram, graph, dot, neato, twopi, circo, fdp, visualisation, visualization, layout, hierarchical
 Requires at least: 3.0.0
 Tested up to: 4.0
-Stable tag: 1.3
+Stable tag: 1.4
 
 Generates Graphviz graphics using shortcodes. Supports almost all Graphviz features.
 
