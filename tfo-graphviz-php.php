@@ -2,13 +2,28 @@
 
 require_once(dirname(__FILE__).'/tfo-graphviz-method.php');
 
+# Check the status of enable_dl() - if it's not enabled and gv.so isn't loaded
+# then none of this will work
+if (!extension_loaded('gv')) {
+	$dl_enabled = get_cfg_var('dl_enabled');
+	if (!$dl_enabled) {
+		# We won't be able to load the module, so this method isn't usable
+		$tfo_include_error = "The PHP 'gv' module is not loaded and 'dl_enabled' is off";
+		return FALSE;
+	}
+}
+
 foreach(array('gv.php', 'libgv-php5/gv.php', 'libgv-php4/gv.php', 'libgv-php/gv.php') as $gv) {
-	@include_once($gv);
+	print "try $gv ";
+	try {
+		@include_once($gv);
+	} catch (Exception $e) {}
 	if(class_exists('gv')) break;
 }
 
 if(!class_exists('gv')) {
 	// Extension didn't load, so we can't either
+	$tfo_include_error = "The PHP 'gv' module did not load";
 	return FALSE;
 }
 
@@ -44,6 +59,9 @@ class TFO_Graphviz_PHP extends TFO_Graphviz_Method {
 	}
 
 	function process_dot($imgfile, $mapfile) {
+		if(!class_exists('gv'))
+			return new WP_Error('blank', __("PHP 'gv' module not loaded", 'tfo-graphviz'));
+
 		if(empty($this->dot))
 			return new WP_Error('blank', __('No graph provided', 'tfo-graphviz'));
 
@@ -116,18 +134,5 @@ class TFO_Graphviz_PHP extends TFO_Graphviz_Method {
 		return $this->url;
 	}
 }
-
-// In WordPress, __() is used for gettext.  If not available, just return the string.
-if ( !function_exists('__') ) { function __($a) { return $a; } }
-
-// In WordPress, this class is used to pass errors between functions.  If not available, recreate in simplest possible form.
-if ( !class_exists('WP_Error') ) :
-class WP_Error {
-	var $e;
-	function WP_Error( $c, $m ) { $this->e = $m; }
-	function get_error_message() { return $this->e; }
-}
-function is_wp_error($a) { return is_object($a) && is_a($a, 'WP_Error'); }
-endif;
 
 return TRUE;

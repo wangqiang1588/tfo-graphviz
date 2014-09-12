@@ -14,7 +14,8 @@ class TFO_Graphviz_Method {
 	function __construct($dot, $atts) {
 		$this->dot  = (string) $dot;
 		foreach(array('id', 'lang', 'simple', 'output', 'href', 'imap', 'title') as $att) {
-			if($atts[$att]) $this->$att = $atts[$att];
+			if(array_key_exists($att, $atts))
+				$this->$att = $atts[$att];
 		}
 		$this->url = false;
 	}

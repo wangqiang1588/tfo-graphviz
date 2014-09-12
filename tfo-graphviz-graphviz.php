@@ -7,6 +7,16 @@ TFO_GRAPHVIZ_GRAPHVIZ_PATH
 
 require_once(dirname(__FILE__).'/tfo-graphviz-method.php');
 
+if(!defined('TFO_GRAPHVIZ_GRAPHVIZ_PATH')) {
+	$tfo_include_error = "'TFO_GRAPHVIZ_GRAPHVIZ_PATH' is not defined";
+	return FALSE;
+}
+
+if(!file_exists(TFO_GRAPHVIZ_GRAPHVIZ_PATH)) {
+	$tfo_include_error = "'TFO_GRAPHVIZ_GRAPHVIZ_PATH' points to file '" . TFO_GRAPHVIZ_GRAPHVIZ_PATH . "' which does not exist";
+	return FALSE;
+}
+
 class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 	var $tmp_file;
 	var $img_path_base;
@@ -67,16 +77,19 @@ class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 		$ds = array(
 			0 => array('pipe', 'r'),
 			1 => array('pipe', 'w'),
-			2 => array('file', '/dev/null', 'w'),
+			2 => array('pipe', 'w'),
 		);
-		$pipes = undef;
+		$pipes = false;
 		$proc = proc_open($cmd, $ds, $pipes, '/tmp', array());
+		$out = ''; $err = '';
 		if(is_resource($proc)) {
 			fwrite($pipes[0], $this->dot);
 			fclose($pipes[0]);
 	
 			$out = stream_get_contents($pipes[1]);
 			fclose($pipes[1]);
+			$err = stream_get_contents($pipes[2]);
+			fclose($pipes[2]);
 
 			proc_close($proc);
 		} else {
@@ -84,7 +97,7 @@ class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 		}
 
 		if(!file_exists($imgfile) || ($this->imap && !file_exists($mapfile))) {
-			return new WP_Error('graphviz_exec', __( 'Graphviz cannot generate graph', 'tfo-graphviz' ), "No output files generated.");
+			return new WP_Error('graphviz_exec', __( 'Graphviz cannot generate graph', 'tfo-graphviz' ), $err);
 		}
 
 		return true;
@@ -110,18 +123,18 @@ class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 
 		$hash = $this->hash_file();
 
-		$imgfile = "$this->img_path_base/$hash.$this->output";
-		$mapfile = "$this->img_path_base/$hash.map";
+		$imgfile = $this->img_path_base.'/'.$hash.'.'.$this->output;
+		$mapfile = $this->img_path_base.'/'.$hash.'.map';
 		if (is_super_admin() || !file_exists($imgfile) || ($this->imap && !file_exists($mapfile))) {
 			$ret = $this->process_dot($imgfile, $mapfile);
-			if ( is_wp_error( $file ) ) {
-				$this->error =& $ret;
+			if ( is_wp_error( $ret ) ) {
+				$this->error = $ret;
 				return $this->error;
 			}
 		}
 
 		$this->file = $imgfile;
-		$this->url = "$this->img_url_base/$hash.$this->output";
+		$this->url = $this->img_url_base.'/'.$hash.'.'.$this->output;
 		if($this->imap) {
 			if(file_exists($mapfile)) $this->imap = file_get_contents($mapfile);
 			else $this->imap = false;
@@ -129,18 +142,5 @@ class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 		return $this->url;
 	}
 }
-
-// In WordPress, __() is used for gettext.  If not available, just return the string.
-if ( !function_exists('__') ) { function __($a) { return $a; } }
-
-// In WordPress, this class is used to pass errors between functions.  If not available, recreate in simplest possible form.
-if ( !class_exists('WP_Error') ) :
-class WP_Error {
-	var $e;
-	function WP_Error( $c, $m ) { $this->e = $m; }
-	function get_error_message() { return $this->e; }
-}
-function is_wp_error($a) { return is_object($a) && is_a($a, 'WP_Error'); }
-endif;
 
 return TRUE;

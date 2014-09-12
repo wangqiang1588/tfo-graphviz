@@ -2,7 +2,7 @@
 Contributors: chrisy
 Tags: graphviz, flirble, network, diagram, graph, dot, neato, twopi, circo, fdp, visualisation, visualization, layout, hierarchical
 Requires at least: 3.0.0
-Tested up to: 3.9
+Tested up to: 4.0
 Stable tag: 1.3
 
 Generates Graphviz graphics using shortcodes. Supports almost all Graphviz features.
@@ -28,7 +28,6 @@ Installation is simple. Either install from directly within WordPress or:
 You need access to a Graphviz renderer:
 * By using a local installation of Graphviz and the *dot* binary.
 * By using a local installation and PHP bindings to the library.
-* By using a remote Graphviz render service. (This is experimental!)
 
 See the FAQ for more details on these options and http://www.graphviz.org/Download.php for details on installing Graphviz on your web server.
 
@@ -50,11 +49,11 @@ The online documentation for [Graphviz](http://www.graphviz.org/) is terse and n
 
 There are however several other introductions to Graphviz and DOT, including [an excerpt on the O'Reilly LinuxDevCenter.com site](http://linuxdevcenter.com/pub/a/linux/2004/05/06/graphviz_dot.html). Another approach would be to look at the examples in the [Graphviz gallery](http://www.graphviz.org/Gallery.php).
 
-If in doubt, find an example and experiment with it.
+Users should note that DOT syntax varies between processors and between version of those processors. If in doubt, find an example and experiment with it.
 
 = Nothing is being rendered, maybe my DOT is broken? =
 
-If you're using a local Graphviz renderer then errors from Graphviz will likely appear in your webserver error logs.
+If you're using a local Graphviz renderer then errors from Graphviz should be presented where you expect the graph to appear.
 
 = How do I install Graphviz locally =
 
@@ -67,18 +66,6 @@ methods that are actually available and configured correctly.
 1. Using a local Graphviz installation and the *dot* binary. You configure the path to this binary on the admin settings page of the plugin.
 1. Using PHP bindings to the Graphviz library. This requires that *gv.php* is available and that the associated module is either already loaded or loadable with *dl()*. *dl* is often disabled in *php.ini* and doesn't work on multithreaded webservers (in which case, ensure the library is loaded with *extensions=gv.so* or similar somewhere in the PHP configuration).
 
-= How do I use Graphviz remotely? =
-
-You can also use a remote Graphiz render service with no need to install Graphviz locally. This does however require that your PHP has the *curl* extension loaded.
-
-The plugin caches results locally thus reducing the number of times it needs to generate a new graph; though do note that a logged-in administrator does not use the cache.
-
-This is an experimental service and may be withdrawn at any time. The intention is to make this a *freemium* service, where for no charge you can render graphs but with some sort of mark added to it to indicate use of service. Users can also pay a nominal subscription and have graphs rendered without this mark. At the moment the service will operate in "*free*" mode and ignore any entered API key. Feedback is welcomed on this feature.
-
-= Where do I get an API key for remote rendering? =
-
-At the moment, you can't. This value is currently ignored.
-
 
 == Screenshots ==
 
@@ -87,43 +74,45 @@ At the moment, you can't. This value is currently ignored.
 
 `
     [graphviz lang="dot" output="png" simple="yes" imap="yes" href="self" title="TFO Graphviz Demo"]
-    
-    style=filled; bgcolor="#f1f1f1";
-    fontsize=10; labeljust=l;
-    
+
     node [style="rounded,filled", color=lightblue2, fontsize=10, shape=box];
     edge [arrowhead=vee, arrowsize=0.5];
-    
+
     subgraph cluster_client {
       node [label="File system", URL="http://en.wikipedia.org/wiki/Xfs"]; fs;
       node [label="LVM", URL="http://en.wikipedia.org/wiki/Logical_Volume_Manager_(Linux)"]; lvm;
       node [label="Linux HBA driver", URL="http://www.ibm.com/developerworks/linux/library/l-scsi-subsystem/"]; clienthba;
       fs -> lvm -> clienthba;
-      bgcolor=lightgrey;
+      bgcolor = lightgrey;
       label = "Virtual Machine";
       URL = "http://www.ubuntu.com/";
     }
-    
+
     subgraph cluster_esxi {
       node [label="Virtual HBA hardware"]; virtualhba;
       node [label="VMDK file"]; vmdk;
       node [label="vmfs"]; vmfs;
       node [label="ESXi HBA driver"]; vmhba;
       virtualhba -> vmdk -> vmfs -> vmhba;
-      bgcolor=white;
+      bgcolor = white;
       label = "Hypervisor";
       URL = "http://www.vmware.com/products/vsphere-hypervisor/";
     }
-    
+
     subgraph cluster_hardware {
       node [label="Physical HBA hardware", URL="http://tinyurl.com/dellpercraid"]; phba;
       node [label="Physical disks", URL="http://www.amazon.com/gp/product/B002B7EIVC?ie=UTF8&tag=clblog01-20&linkCode=as2&camp=1789&creative=390957&creativeASIN=B002B7EIVC"]; disks;
       phba -> disks;
-      style=filled; bgcolor=lightgrey;
+      style = filled; bgcolor = lightgrey;
       label = "Hardware";
       URL = "http://www.dell.com/us/business/p/poweredge-r515/pd";
     }
-    
+
+    style=filled;
+    bgcolor=aquamarine4;
+    fontsize=10;
+    labeljust=l;
+
     clienthba -> virtualhba;
     vmhba -> phba;
     label = "I/O stack";
@@ -132,6 +121,15 @@ At the moment, you can't. This value is currently ignored.
 
 
 == Changelog ==
+
+= 1.4 = 
+* Wordpress 4.0 support.
+* Fix for PHP Graphviz module loading; newer PHP's don't allow dl() at all in some cases, we should therefore detect this.
+* Use WP_Error properly.
+* Liberal use of try/catch to detect runtime issues.
+
+= 1.3 =
+* No changes; version bump for the later 3.x series.
 
 = 1.2 =
 * Removed leftover diagnostic code in PHP render class (which was appearing in posts!)
@@ -195,7 +193,7 @@ Where `<options>` is anything from this list. All are entirely optional:
 * `simple="yes|no"`
 
   The `simple` option provides a very basic DOT wrapper around your code such that the following is possible:
- 
+
   `
   [graphviz simple="yes"] a -> b -> c; [/graphviz]
   `

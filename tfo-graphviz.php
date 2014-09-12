@@ -3,7 +3,7 @@
 Plugin Name: TFO Graphviz
 Plugin URI: http://blog.flirble.org/projects/graphviz
 Description: Converts inline DOT code into an image, with optional image map, using Graphviz.
-Version: 1.3
+Version: 1.4
 Author: Chris Luke
 Author URI: http://blog.flirble.org/
 Copyright: Chris Luke
@@ -95,6 +95,8 @@ class TFO_Graphviz {
 			'id' => 'tfo_graphviz_'.($this->count++),
 			'lang' => 'dot',
 			'simple' => false,
+			'digraph' => false,
+			'graph' => false,
 			'output' => 'png',
 			'imap' => false,
 			'href' => false,
@@ -102,18 +104,25 @@ class TFO_Graphviz {
 			'remote_key' => $this->options['remote_key'],
 		), $_atts);
 
+		file_put_contents("/tmp/pre", $dot);
+
 		$dot = preg_replace(array('#<br\s*/?>#i', '#</?p>#i'), ' ', $dot);
 
 		$dot = str_replace(
 			array('&lt;', '&gt;', '&quot;', '&#8220;', '&#8221;', '&#039;', '&#8125;', '&#8127;', '&#8217;', '&#038;', '&amp;', "\r", "\xa0", '&#8211;'),
-			array('<',    '>',    '"',      '"',       '"',        "'",      "'",       "'",       "'",       '&',      '&',    '',    '-', ''),
+			array('<',    '>',    '"',      '"',       '"',       "'",      "'",       "'",       "'",       '&',      '&',     '',   '-',    ''),
 			$dot
 		);
 
 		if($atts['simple']) { # emulate eht-graphviz
 			$dot = "digraph ".$atts['id']." {\n$dot\n}\n";
+		} elseif($atts['digraph']) {
+			$dot = "digraph ".$atts['id']." {\n$dot\n}\n";
+		} elseif($atts['graph']) {
+			$dot = "graph ".$atts['id']." {\n$dot\n}\n";
 		}
 
+		file_put_contents("/tmp/post", $dot);
 		$gv = $this->graphviz($dot, $atts);
 		if(!$gv) {
 			$e = "Graphviz generation failed";
@@ -121,20 +130,42 @@ class TFO_Graphviz {
 			else $e .= '.';
 			return $e;
 		}
-		$url = clean_url($gv->url());
-		$href = $gv->href;
-		if($href) {
-			if(strtolower($href) == 'self') $href = $url;
-			else $href = clean_url($href);
-		}
-		$alt = attribute_escape(is_wp_error($gv->error) ? $gv->error->get_error_message() . ": $gv->dot" : $gv->title);
 
-		$ret = "<img src=\"$url\" class=\"graphviz\"";
-		if(!empty($alt)) $ret .= " alt=\"$alt\" title=\"$alt\"";
-		if(!empty($gv->imap)) $ret .= " usemap=\"#$gv->id\"";
-		$ret .= " />";
-		if(!empty($href)) $ret = "<a href=\"".$href."\">$ret</a>";
-		if(!empty($gv->imap)) $ret .= "\n$gv->imap";
+		$url = false;
+		try {
+			$url = $gv->url();
+		} catch (Exception $e) {
+			$e = "Graphviz generation failed";
+			if($this->err) $e .= ': '.$this->err;
+			else $e .= '.';
+			return $e;
+		}
+		if(!is_wp_error($url)) {
+			$url = esc_url($url);
+			$href = $gv->href;
+			if($href) {
+				if(strtolower($href) == 'self') $href = $url;
+				else $href = clean_url($href);
+			}
+			$alt = esc_attr($gv->title);
+			$ret = "<img src=\"$url\" class=\"graphviz\"";
+			if(!empty($alt)) $ret .= " alt=\"$alt\" title=\"$alt\"";
+			if(!empty($gv->imap)) $ret .= " usemap=\"#$gv->id\"";
+			$ret .= " />";
+			if(!empty($href)) $ret = "<a href=\"".$href."\">$ret</a>";
+			if(!empty($gv->imap)) $ret .= "\n$gv->imap";
+
+		} else {
+			$ret = "<p><b>Error generating Graphviz image</b></p>\n";
+			$ret .= "<pre>";
+			$ret .= $url->get_error_message();
+			$d = $url->get_error_data();
+			if($d) {
+				$ret .= "\n";
+				$ret .= $url->get_error_data();
+			}
+			$ret .= "</pre>\n";
+		}
 
 		return $ret;
 	}
@@ -170,15 +201,13 @@ class TFO_Graphviz {
 			return false;
 		}
 
-		require_once(dirname( __FILE__ )."/tfo-graphviz-{$this->methods[$this->options['method']]}.php" );
-		$gv_object = new $this->options['method']($dot, $atts, TFO_GRAPHVIZ_CONTENT_DIR, TFO_GRAPHVIZ_CONTENT_URL);
+		$gv_method = $this->options['method'];
+		require_once(dirname( __FILE__ ).'/tfo-graphviz-'.$this->methods[$gv_method].'.php' );
+		$gv_object = new $gv_method($dot, $atts, TFO_GRAPHVIZ_CONTENT_DIR, TFO_GRAPHVIZ_CONTENT_URL);
 		if(!$gv_object) {
 			$this->err = "Unable to create Graphviz renderer, check your plugin settings";
 			return false;
 		}
-
-		// Force generation of the image etc
-		//$gv_object->url();
 
 		return $gv_object;
 	}

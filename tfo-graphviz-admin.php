@@ -131,12 +131,19 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 		}
 
 		$message = '';
-
 		$r = false;
+		$url = false;
 
-		$url = $graphviz_object->url();
-		if ( !empty( $graphviz_object->tmp_file ) )
-			exec( 'mv ' . escapeshellarg( "$graphviz_object->tmp_file.log" ) . ' ' . TFO_GRAPHVIZ_CONTENT_DIR.'/test.log' );
+		try {
+			$url = $graphviz_object->url();
+		} catch (Exception $e) {
+			return false;
+		}
+
+		if ( !empty($graphviz_object->tmp_file) ) {
+			#exec( 'mv ' . escapeshellarg( $graphviz_object->tmp_file.".log" ) . ' ' . TFO_GRAPHVIZ_CONTENT_DIR.'/test.log' );
+			rename($graphviz_object->tmp_file.'.log', TFO_GRAPHVIZ_CONTENT_DIR.'/test.log');
+		}
 
 		if(is_wp_error($url)) {
 			$code = $url->get_error_code();
@@ -216,15 +223,33 @@ tr.tfo-graphviz-method-<?php echo $current_method; ?> {
 		if(!current_user_can( 'manage_options'))
 			wp_die(__('You need more special-sauce to manage TFO Graphviz.', 'tfo-graphviz'));
 
-		$available_methods = array();	
+		$available_methods = array();
+		$unavailable_methods = array();
 		foreach ( $this->methods as $class => $method ) {
-			$included = include_once(dirname(__FILE__)."/tfo-graphviz-$method.php" );
-			if($included === FALSE) // module didn't load, or indicated it was not useable
+			#if('TFO_Graphviz_Remote' == $class)
+			#	continue;
+
+			$included = FALSE;
+			$tfo_include_error = "";
+			try {
+				$included = include_once(dirname(__FILE__)."/tfo-graphviz-$method.php" );
+			} catch (Exception $e) {
+				$unavailable_methods[$class] = "Exception during method load: ...";
 				continue;
+			}
+			if($included === FALSE) { // module didn't load, or indicated it was not useable
+				$unavailable_methods[$class] = "Module refused to load: ...";
+				continue;
+			}
+
+			try {
+				$graphviz_object = new $class('a->b;', array('id'=>'admin','simple'=>true));
+
+			} catch (Exception $e) {
+				$unavailable_methods[$class] = "Exception when testing the method: ...";
+				continue;
+			}
 			$available_methods[$class] = $method;
-			if('TFO_Graphviz_Remote' == $class)
-				continue;
-			$graphviz_object = new $class('a->b;', array(id=>'admin',simple=>true));
 		}
 		unset( $class, $method, $graphviz_object );
 

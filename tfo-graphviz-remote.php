@@ -2,8 +2,13 @@
 
 require_once(dirname(__FILE__).'/tfo-graphviz-method.php');
 
+# Not supported, yet.
+$tfo_include_error = "Not supported";
+return FALSE;
+
 if(!function_exists('curl_init')) {
 	// Extension didn't load, so we can't either
+	$tfo_include_error = "Requires 'curl' module";
 	return FALSE;
 }
 
@@ -153,18 +158,5 @@ class TFO_Graphviz_Remote extends TFO_Graphviz_Method {
 		return $this->url;
 	}
 }
-
-// In WordPress, __() is used for gettext.  If not available, just return the string.
-if ( !function_exists('__') ) { function __($a) { return $a; } }
-
-// In WordPress, this class is used to pass errors between functions.  If not available, recreate in simplest possible form.
-if ( !class_exists('WP_Error') ) :
-class WP_Error {
-	var $e;
-	function WP_Error( $c, $m ) { $this->e = $m; }
-	function get_error_message() { return $this->e; }
-}
-function is_wp_error($a) { return is_object($a) && is_a($a, 'WP_Error'); }
-endif;
 
 return TRUE;
