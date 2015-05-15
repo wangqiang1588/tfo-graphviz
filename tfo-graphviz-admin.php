@@ -163,10 +163,11 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 			endif;
 			echo $message;
 		} else {
-			if ( !empty( $graphviz_object->file ) ) {
-				exec('mv ' . escapeshellarg("$graphviz_object->file" ) . ' ' . TFO_GRAPHVIZ_CONTENT_DIR.'/test.png');
-				$url = content_url( TFO_GRAPHVIZ_CONTENT.'/test.png' ) . "?" . mt_rand();
-			}
+                        if (!empty($graphviz_object->file)) {
+                                // Rename the generated image, and create a unique URL for it.
+                                rename($graphviz_object->file, TFO_GRAPHVIZ_CONTENT_DIR . '/test.png');
+                                $url = content_url(TFO_GRAPHVIZ_CONTENT . '/test.png') . '?' . mt_rand();
+                        }
 			@unlink(TFO_GRAPHVIZ_CONTENT_DIR.'/test.log');
 			$alt = attribute_escape( __( 'Test Image', 'tfo-graphviz' ) );
 			echo "<img class='test-image' src='" . clean_url( $url ) . "' alt='$alt' />\n";
