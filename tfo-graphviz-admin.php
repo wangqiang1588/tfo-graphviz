@@ -111,13 +111,13 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 		if (!is_writable(TFO_GRAPHVIZ_CONTENT_DIR))
 			return false;
 
-		if ( is_array( $this->options ) )
+		if (is_array($this->options))
 			extract($this->options, EXTR_SKIP);
 
 		if ('TFO_Graphviz_Graphviz' == $method && (!$graphviz_path))
 			return;
 
-		@unlink(TFO_GRAPHVIZ_CONTENT_DIR.'/test.png');
+		@unlink(TFO_GRAPHVIZ_CONTENT_DIR . '/test.png');
 
 		$graphviz_object = $this->graphviz('digraph test { a1 -> a2 -> a3 -> a1; }', array(
 			'id' => 'test',
@@ -140,12 +140,11 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 			return false;
 		}
 
-		if ( !empty($graphviz_object->tmp_file) ) {
-			#exec( 'mv ' . escapeshellarg( $graphviz_object->tmp_file.".log" ) . ' ' . TFO_GRAPHVIZ_CONTENT_DIR.'/test.log' );
-			rename($graphviz_object->tmp_file.'.log', TFO_GRAPHVIZ_CONTENT_DIR.'/test.log');
+		if (!empty($graphviz_object->tmp_file)) {
+			rename($graphviz_object->tmp_file . '.log', TFO_GRAPHVIZ_CONTENT_DIR . '/test.log');
 		}
 
-		if(is_wp_error($url)) {
+		if (is_wp_error($url)) {
 			$code = $url->get_error_code();
 			if ( false !== strpos( $code, '_exec' ) ) :
 				$message = "<div class='error'>\n";
@@ -153,7 +152,11 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 				exec( $exec, $out, $r );
 				$message .= "<h4>Command run:</h4>\n";
 				$message .= "<div class='pre'><code>$exec</code></div>\n";
-				$out = preg_replace( '/tex_.+?\.log/i', '<strong><a href="' . clean_url( content_url( TFO_GRAPHVIZ_CONTENT.'/test.log' ) ) . '">test.log</a></strong>', join("\n", $out));
+				$out = preg_replace( '/tex_.+?\.log/i', 
+					'<strong><a href="' . 
+					clean_url( content_url( TFO_GRAPHVIZ_CONTENT.'/test.log' ) ) . 
+					'">test.log</a></strong>',
+					join("\n", $out));
 				$message .= "<h4>Result:</h4>\n";
 				$message .= "<div class='pre'><code>$out</code></div>\n";
 				$message .= "<p>Exit code: $r</p>\n";
@@ -163,11 +166,11 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 			endif;
 			echo $message;
 		} else {
-                        if (!empty($graphviz_object->file)) {
-                                // Rename the generated image, and create a unique URL for it.
-                                rename($graphviz_object->file, TFO_GRAPHVIZ_CONTENT_DIR . '/test.png');
-                                $url = content_url(TFO_GRAPHVIZ_CONTENT . '/test.png') . '?' . mt_rand();
-                        }
+			if (!empty($graphviz_object->file)) {
+				// Rename the generated image, and create a unique URL for it.
+				rename($graphviz_object->file, TFO_GRAPHVIZ_CONTENT_DIR . '/test.png');
+				$url = content_url(TFO_GRAPHVIZ_CONTENT . '/test.png') . '?' . mt_rand();
+			}
 			@unlink(TFO_GRAPHVIZ_CONTENT_DIR.'/test.log');
 			$alt = attribute_escape( __( 'Test Image', 'tfo-graphviz' ) );
 			echo "<img class='test-image' src='" . clean_url( $url ) . "' alt='$alt' />\n";
