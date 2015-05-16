@@ -1,0 +1,17 @@
+= This feature is not yet implemented! =
+
+[add to renderer list]
+* By using a remote Graphviz render service. (This is experimental!)
+
+= How do I use Graphviz remotely? =
+
+You can also use a remote Graphiz render service with no need to install Graphviz locally. This does however require that your PHP has the *curl* extension loaded.
+
+The plugin caches results locally thus reducing the number of times it needs to generate a new graph; though do note that a logged-in administrator does not use the cache.
+
+This is an experimental service and may be withdrawn at any time. The intention is to make this a *freemium* service, where for no charge you can render graphs but with some sort of mark added to it to indicate use of service. Users can also pay a nominal subscription and have graphs rendered without this mark. At the moment the service will operate in "*free*" mode and ignore any entered API key. Feedback is welcomed on this feature.
+
+= Where do I get an API key for remote rendering? =
+
+At the moment, you can't. This value is currently ignored.
+
