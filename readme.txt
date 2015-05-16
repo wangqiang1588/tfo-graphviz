@@ -194,6 +194,12 @@ This image was generated with the following markup:
 
 == Changelog ==
 
+= 1.7 =
+* Test upto WP 4.2.2
+* Change an exec("mv...") to using rename() instead.
+* Code documentation improvement
+* Some reformatting
+
 = 1.6 =
 * Fix some cosmetic documentation issues.
 
