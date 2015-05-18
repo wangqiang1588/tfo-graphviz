@@ -125,7 +125,7 @@ class TFO_Graphviz_Graphviz extends TFO_Graphviz_Method {
 			2 => array('pipe', 'w'),
 		);
 		$pipes = false;
-		$proc = proc_open($cmd, $ds, $pipes, '/tmp', array());
+		$proc = proc_open($cmd, $ds, $pipes, sys_get_temp_dir(), array());
 		$out = ''; $err = '';
 		if (is_resource($proc)) {
 			fwrite($pipes[0], $this->dot);
