@@ -194,9 +194,13 @@ This image was generated with the following markup:
 
 == Changelog ==
 
+= 1.8 =
+* Fix a packaging error in 1.7.
+* Fix use of hardcoded "/tmp" path. (Sam Wilson)
+
 = 1.7 =
 * Test upto WP 4.2.2
-* Change an exec("mv...") to using rename() instead.
+* Change an exec("mv...") to using rename() instead. (Sam Wilson)
 * Code documentation improvement
 * Some reformatting
 
