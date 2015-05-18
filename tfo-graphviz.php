@@ -11,7 +11,7 @@
 Plugin Name: TFO Graphviz
 Plugin URI: http://blog.flirble.org/projects/graphviz
 Description: Converts inline DOT code into an image, with optional image map, using Graphviz.
-Version: 1.7
+Version: 1.8
 Author: Chris Luke
 Author URI: http://blog.flirble.org/
 Copyright: Chris Luke
