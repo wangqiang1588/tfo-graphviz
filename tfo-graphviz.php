@@ -21,6 +21,8 @@ License: GPL2+
 
 if (!defined('ABSPATH')) exit;
 
+@define('TFO_GV_DEBUG', false);
+
 class TFO_Graphviz {
 	var $options;
 	var $methods = array(
@@ -133,7 +135,7 @@ class TFO_Graphviz {
 				'remote_key' => $this->options['remote_key'],
 			), $_atts);
 
-		file_put_contents("/tmp/pre", $dot);
+		if (TFO_GV_DEBUG) file_put_contents(sys_get_temp_dir() . "/pre", $dot);
 
 		$dot = preg_replace(array('#<br\s*/?>#i', '#</?p>#i'), ' ', $dot);
 
@@ -151,7 +153,8 @@ class TFO_Graphviz {
 			$dot = "graph ".$atts['id']." {\n$dot\n}\n";
 		}
 
-		file_put_contents("/tmp/post", $dot);
+		if (TFO_GV_DEBUG) file_put_contents(sys_get_temp_dir() . "/post", $dot);
+
 		$gv = $this->graphviz($dot, $atts);
 		if (!$gv) {
 			$e = "Graphviz generation failed";
