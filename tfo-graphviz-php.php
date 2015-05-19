@@ -40,8 +40,6 @@ class TFO_Graphviz_PHP extends TFO_Graphviz_Method {
 	var $img_url_base;
 	var $file;
 
-	var $_debug = false;
-
 
 	/**
 	 * Constructor for Graphviz.
@@ -137,7 +135,7 @@ class TFO_Graphviz_PHP extends TFO_Graphviz_Method {
 	 * @return bool True on success, False otherwise.
 	 */
 	function unlink_tmp_files() {
-		if ( $this->_debug )
+		if ( TFO_GV_DEBUG )
 			return;
 
 		if ( !$this->tmp_file )

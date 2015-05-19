@@ -194,6 +194,10 @@ This image was generated with the following markup:
 
 == Changelog ==
 
+= 1.9 -
+* Make some debugging output conditional
+* Fix where that debugging output is stored
+
 = 1.8 =
 * Fix a packaging error in 1.7.
 * Fix use of hardcoded "/tmp" path. (Sam Wilson)
