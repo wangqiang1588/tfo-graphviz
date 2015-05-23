@@ -1,7 +1,7 @@
 === TFO Graphviz ===
 Contributors: chrisy
 Tags: graphviz, flirble, network, diagram, graph, dot, neato, twopi, circo, fdp, visualisation, visualization, layout, hierarchical
-Requires at least: 3.0.0
+Requires at least: 4.2.0
 Tested up to: 4.2.2
 Stable tag: 1.9
 
@@ -194,9 +194,12 @@ This image was generated with the following markup:
 
 == Changelog ==
 
-= 1.9 -
+= 1.10 =
+* Require at least WP 4.2 now.
+
+= 1.9 =
 * Make some debugging output conditional
-* Fix where that debugging output is stored
+* Fix where that debugging output is stored (Sam Wilson)
 
 = 1.8 =
 * Fix a packaging error in 1.7.
