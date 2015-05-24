@@ -4,6 +4,8 @@ Tags: graphviz, flirble, network, diagram, graph, dot, neato, twopi, circo, fdp,
 Requires at least: 4.2.0
 Tested up to: 4.2.2
 Stable tag: 1.9
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Generates Graphviz graphics using shortcodes. Supports almost all Graphviz features.
 
@@ -196,20 +198,22 @@ This image was generated with the following markup:
 
 = 1.10 =
 * Require at least WP 4.2 now.
+* Fix use of add_query_arg() to escape its output; a possible XSS vector.
+* Added GPL v2 license.
 
 = 1.9 =
-* Make some debugging output conditional
-* Fix where that debugging output is stored (Sam Wilson)
+* Make some debugging output conditional.
+* Fix where that debugging output is stored. (Sam Wilson)
 
 = 1.8 =
 * Fix a packaging error in 1.7.
 * Fix use of hardcoded "/tmp" path. (Sam Wilson)
 
 = 1.7 =
-* Test upto WP 4.2.2
+* Test upto WP 4.2.2.
 * Change an exec("mv...") to using rename() instead. (Sam Wilson)
-* Code documentation improvement
-* Some reformatting
+* Code documentation improvement.
+* Some reformatting.
 
 = 1.6 =
 * Fix some cosmetic documentation issues.
