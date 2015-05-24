@@ -98,7 +98,7 @@ class TFO_Graphviz_Admin extends TFO_Graphviz {
 		check_admin_referer('tfo-graphviz');
 
 		if ($this->update(stripslashes_deep($_POST['tfo-graphviz']))) {
-			wp_redirect(add_query_arg('updated', '', wp_get_referer()));
+			wp_redirect(esc_url_raw(add_query_arg('updated', '', wp_get_referer())));
 			exit;
 		}
 	}
@@ -345,7 +345,7 @@ tr.tfo-graphviz-method-<?php echo $current_method; ?> {
 
 	<?php if ( empty( $errors ) ) $this->test_image(); ?>
 
-	<form action="<?php echo clean_url( remove_query_arg( 'updated' ) ); ?>" method="post">
+	<form action="<?php echo esc_url( remove_query_arg( 'updated' ) ); ?>" method="post">
 
 	<table class="form-table">
 	<tbody>
