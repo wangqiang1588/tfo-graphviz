@@ -27,14 +27,15 @@
 // $Id$
 /*
 Plugin Name: TFO Graphviz
-Plugin URI: http://blog.flirble.org/projects/graphviz
+Plugin URI: http://blog.flirble.org/projects/graphviz/
 Description: Converts inline DOT code into an image, with optional image map, using Graphviz.
 Version: 1.10
 Author: Chris Luke
 Author URI: http://blog.flirble.org/
 Copyright: Chris Luke
-Copyrught: The Flirble Organisation
+Copyright: The Flirble Organisation
 License: GPL2+
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 if (!defined('ABSPATH')) exit;

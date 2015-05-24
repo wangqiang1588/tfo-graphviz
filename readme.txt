@@ -111,7 +111,7 @@ Use the `[graphviz]` shortcode. Details are in the *Description* section.
 
 = How to I write DOT? =
 
-The online documentation for [Graphviz](http://www.graphviz.org/) is terse and not especially helpful, in particular the [DOT language](http://www.graphviz.org/doc/info/lang.html) page is only helpful if you happen to be able to read and approximation of [BNF](http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form).
+The online documentation for [Graphviz](http://www.graphviz.org/) is terse and not especially helpful, in particular the [DOT language](http://www.graphviz.org/doc/info/lang.html) page is only helpful if you happen to be able to read an approximation of [BNF](http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form).
 
 There are however several other introductions to Graphviz and DOT, including [an excerpt on the O'Reilly LinuxDevCenter.com site](http://linuxdevcenter.com/pub/a/linux/2004/05/06/graphviz_dot.html). Another approach would be to look at the examples in the [Graphviz gallery](http://www.graphviz.org/Gallery.php).
 
@@ -142,7 +142,9 @@ For these cases you must ensure the library is loaded with an entry like `extens
 
 == Screenshots ==
 
-[Virtual Disk Stack](screenshot-1.png)
+1. Virtual Disk Stack
+
+![Virtual Disk Stack](https://ps.w.org/tfo-graphviz/trunk/screenshot-1.png "Virtual Disk Stack")
 
 This image was generated with the following markup:
 
@@ -199,7 +201,7 @@ This image was generated with the following markup:
 = 1.10 =
 * Require at least WP 4.2 now.
 * Fix use of add_query_arg() to escape its output; a possible XSS vector.
-* Added GPL v2 license.
+* Added GPL v2 license information.
 
 = 1.9 =
 * Make some debugging output conditional.
